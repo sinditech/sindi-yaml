@@ -1,0 +1,20 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>za.co.sindi.yaml</groupId>
+		<artifactId>sindi-yaml</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>sindi-yaml-impl</artifactId>
+	<name>Sindi AI YAML API Implementation</name>
+	<description>The YAML API Implementation in Java.</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>za.co.sindi.yaml</groupId>
+			<artifactId>sindi-yaml-api</artifactId>
+		</dependency>
+	</dependencies>
+</project>
