@@ -27,7 +27,7 @@ public interface YamlReader extends Closeable {
      * @throws IllegalStateException if read, readMapping, readSequence,
      *     readNode or close method is already called
      */
-    YamlNode read();
+    YamlStructure read();
 
     /**
      * Returns a YAML mapping that is represented in
@@ -61,25 +61,25 @@ public interface YamlReader extends Closeable {
      */
     YamlSequence readSequence();
 
-//    /**
-//     * Returns a YAML value that is represented in
-//     * the input source. This method needs to be called
-//     * only once for a reader instance.
-//     *
-//     * @return a YAML node
-//     * @throws YamlException if a YAML value
-//     *     be created due to I/O error (IOException would be
-//     *     cause of YamlException)
-//     * @throws YamlParsingException if a YAML value
-//     *     cannot be created due to incorrect representation
-//     * @throws IllegalStateException if read, readMapping, readSequence,
-//     *     readNode or close method is already called
-//     *
-//     * @since 1.1
-//     */
-//    default YamlNode readNode() {
-//        throw new UnsupportedOperationException();
-//    }
+    /**
+     * Returns a YAML value that is represented in
+     * the input source. This method needs to be called
+     * only once for a reader instance.
+     *
+     * @return a YAML node
+     * @throws YamlException if a YAML value
+     *     be created due to I/O error (IOException would be
+     *     cause of YamlException)
+     * @throws YamlParsingException if a YAML value
+     *     cannot be created due to incorrect representation
+     * @throws IllegalStateException if read, readMapping, readSequence,
+     *     readNode or close method is already called
+     *
+     * @since 1.1
+     */
+    default YamlNode readNode() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Closes this reader and frees any resources associated with the

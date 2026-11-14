@@ -58,6 +58,25 @@ public class YamlWriterImpl implements YamlWriter {
 		writeDone = true;
 	}
 	
+	@Override
+	public void write(YamlStructure value) {
+		// TODO Auto-generated method stub
+		write((YamlNode)value);
+	}
+
+	@Override
+	public void write(YamlNode node) {
+		// TODO Auto-generated method stub
+		if (node instanceof YamlMapping mapping) writeMapping(mapping);
+		else if (node instanceof YamlSequence sequence) writeSequence(sequence);
+		else {
+			ensureWrite();
+			writeDone = true;
+            generator.write(node);
+            generator.flush();
+		}
+	}
+
 	private void ensureWrite() {
 		if (writeDone) {
 			throw new IllegalStateException("Writer write already called.");

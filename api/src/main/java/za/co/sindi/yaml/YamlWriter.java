@@ -17,7 +17,7 @@ public interface YamlWriter extends Closeable {
      *
      * @param sequence YAML sequence that is to be written to the output source
      * @throws YamlException if the specified YAML mapping cannot be
-     *     written due to i/o error (IOException would be cause of
+     *     written due to I/O error (IOException would be cause of
      *     YamlException)
      * @throws IllegalStateException if writeSequence, writeMapping, write or close
      *     method is already called
@@ -30,17 +30,50 @@ public interface YamlWriter extends Closeable {
      *
      * @param mapping YAML mapping that is to be written to the output source
      * @throws YamlException if the specified YAML mapping cannot be
-     *     written due to i/o error (IOException would be cause of YamlException)
+     *     written due to I/O error (IOException would be cause of YamlException)
      * @throws IllegalStateException if writeSequence, writeMapping, write or close
      *     method is already called
      */
     void writeMapping(YamlMapping mapping);
+    
+    /**
+     * Writes the specified YAML {@link YamlObject mapping} or
+     * {@link YamlArray sequence} to the output source. This method needs
+     * to be called only once for a writer instance.
+     *
+     * @param value YAML sequence or mapping that is to be written to the output
+     *              source
+     * @throws YamlException if the specified YAML mapping cannot be
+     *     written due to I/O error (IOException would be cause of
+     *     YamlException)
+     * @throws IllegalStateException if writeArray, writeObject, write
+     *     or close method is already called
+     */
+    void write(YamlStructure value);
+    
+    /**
+     * Writes the specified {@link YamlValue} to the output source.
+     * method needs to be called only once for a write instance.
+     *
+     * @param value a {@code YamlValue} to be written to the output
+     *              source
+     * @throws YamlException if the specified YAML mapping cannot be
+     *     written due to I/O error (IOException would be cause of
+     *     YamlException)
+     * @throws IllegalStateException if writeArray, writeObject, write
+     *     or close method is already called
+     *
+     * @since 1.1
+     */
+    default void write(YamlNode node) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Closes this YAML writer and frees any resources associated with the
      * writer. This method closes the underlying output source.
      *
-     * @throws YamlException if an i/o error occurs (IOException would be
+     * @throws YamlException if an I/O error occurs (IOException would be
      * cause of YamlException)
      */
     @Override

@@ -5,7 +5,7 @@ package za.co.sindi.yaml;
 
 import java.io.Reader;
 
-import za.co.sindi.yaml.stream.YamlParser;
+import za.co.sindi.yaml.stream.YamlParser.Event;
 import za.co.sindi.yaml.stream.YamlParserImpl;
 import za.co.sindi.yaml.stream.YamlParsingException;
 
@@ -27,55 +27,78 @@ public class YamlReaderImpl implements YamlReader {
 	}
 
 	@Override
-	public YamlNode read() {
+	public YamlStructure read() {
 		// TODO Auto-generated method stub
-		ensureRead();
+		ensureNotRead();
 		readDone = true;
-        if (parser.hasNext()) {
-            try {
-            	YamlParser.Event e = parser.next();
-                if (e == YamlParser.Event.START_SEQUENCE) {
-                    return parser.getSequence();
-                } else if (e == YamlParser.Event.START_MAPPING) {
-                    return parser.getMapping();
-                }
-            } catch (IllegalStateException ise) {
-                throw new YamlParsingException(ise.getMessage(), ise, parser.getLocation());
-            }
+		try {
+            Event root = advanceToRoot();
+            return switch (root) {
+                case START_MAPPING -> parser.getMapping();
+                case START_SEQUENCE -> parser.getSequence();
+                default -> throw new YamlParsingException(
+                        "Expected a YAML mapping, sequence at the document root but got " + root,
+                        parser.getLocation());
+            };
+        } catch (IllegalStateException ise) {
+            throw new YamlParsingException(ise.getMessage(), ise, parser.getLocation());
         }
-        throw new YamlException("Internal error.");
 	}
 
 	@Override
 	public YamlMapping readMapping() {
 		// TODO Auto-generated method stub
-		ensureRead();
+		ensureNotRead();
 		readDone = true;
-        if (parser.hasNext()) {
-            try {
-            	parser.next();
-                return parser.getMapping();
-            } catch (IllegalStateException ise) {
-                throw new YamlParsingException(ise.getMessage(), ise, parser.getLocation());
+		try {
+            Event root = advanceToRoot();
+            if (root != Event.START_MAPPING) {
+                throw new YamlParsingException(
+                        "Expected START_MAPPING at the document root but got " + root,
+                        parser.getLocation());
             }
+            return parser.getMapping();
+        } catch (IllegalStateException ise) {
+            throw new YamlParsingException(ise.getMessage(), ise, parser.getLocation());
         }
-        throw new YamlException("Internal error.");
 	}
 
 	@Override
 	public YamlSequence readSequence() {
 		// TODO Auto-generated method stub
-		ensureRead();
+		ensureNotRead();
 		readDone = true;
-        if (parser.hasNext()) {
-            try {
-            	parser.next();
-                return parser.getSequence();
-            } catch (IllegalStateException ise) {
-                throw new YamlParsingException(ise.getMessage(), ise, parser.getLocation());
+		try {
+            Event root = advanceToRoot();
+            if (root != Event.START_SEQUENCE) {
+                throw new YamlParsingException(
+                        "Expected START_SEQUENCE at the document root but got " + root,
+                        parser.getLocation());
             }
+            return parser.getSequence();
+        } catch (IllegalStateException ise) {
+            throw new YamlParsingException(ise.getMessage(), ise, parser.getLocation());
         }
-        throw new YamlException("Internal error.");
+	}
+
+	@Override
+	public YamlNode readNode() {
+		// TODO Auto-generated method stub
+		ensureNotRead();
+		readDone = true;
+		try {
+            Event root = advanceToRoot();
+            return switch (root) {
+                case START_MAPPING -> parser.getMapping();
+                case START_SEQUENCE -> parser.getSequence();
+                case VALUE_STRING, VALUE_NUMBER, VALUE_TRUE, VALUE_FALSE, VALUE_NULL -> parser.getValue();
+                default -> throw new YamlParsingException(
+                        "Expected a YAML mapping, sequence or scalar at the document root but got " + root,
+                        parser.getLocation());
+            };
+        } catch (IllegalStateException ise) {
+            throw new YamlParsingException(ise.getMessage(), ise, parser.getLocation());
+        }
 	}
 
 	@Override
@@ -85,9 +108,36 @@ public class YamlReaderImpl implements YamlReader {
 		readDone = true;
 	}
 	
-	private void ensureRead() {
+	private void ensureNotRead() {
 		if (readDone) {
 			throw new IllegalStateException("Reader read already called.");
 		}
 	}
+	
+	/**
+     * Advances the parser past document framing events until the root value
+     * of the first document is current ({@code START_MAPPING},
+     * {@code START_SEQUENCE}, or a scalar value event).
+     *
+     * @return the event at the root of the first document
+     */
+    private Event advanceToRoot() {
+        while (parser.hasNext()) {
+            Event e = parser.next();
+            switch (e) {
+                case START_DOCUMENT, END_DOCUMENT -> {
+                    // Multi-doc streams: keep scanning until a real root appears.
+                    // END_DOCUMENT of an empty doc is ignored the same way.
+                }
+                case START_MAPPING, START_SEQUENCE,
+                        VALUE_STRING, VALUE_NUMBER, VALUE_TRUE, VALUE_FALSE, VALUE_NULL -> {
+                    return e;
+                }
+                default -> throw new YamlParsingException(
+                        "Unexpected event while locating document root: " + e,
+                        parser.getLocation());
+            }
+        }
+        throw new YamlParsingException("No YAML document found in the input", parser.getLocation());
+    }
 }

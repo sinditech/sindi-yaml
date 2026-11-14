@@ -26,7 +26,7 @@ public class ProcessingExample {
 
     public static void main(String[] args) {
         // 1. Read into the immutable object model (anchors, aliases and merge keys are resolved).
-        YamlMapping root = (YamlMapping) Yaml.createParser(new StringReader(DOCUMENT)).getMapping();
+        YamlMapping root = (YamlMapping) Yaml.createReader(new StringReader(DOCUMENT)).read();
         YamlMapping production = root.getYamlMapping("production");
         System.out.println("adapter   = " + production.getString("adapter"));      // merged from *defaults
         System.out.println("pool      = " + production.getInt("pool"));

@@ -73,7 +73,7 @@ public final class ScalarResolver {
 
     /** @return the number for a core-schema numeric lexeme, or {@code null} if {@code s} is not one */
     static YamlNumber<? extends Number> parseNumber(String s) {
-        int len = s.length();
+    	int len = s.length();
         int i = 0;
         boolean negative = false;
         char first = s.charAt(0);
@@ -82,32 +82,40 @@ public final class ScalarResolver {
             i = 1;
             if (len == 1) return null;
         }
+
         String rest = s.substring(i);
-        if (rest.equals(".inf") || rest.equals(".Inf") || rest.equals(".INF")) {
-            return new YamlDoubleNumber(negative ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY); //, s);
+        if (rest.equalsIgnoreCase(".inf")) {
+            return new YamlDoubleNumber(negative ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY);
         }
         if (i == 0 && (s.equals(".nan") || s.equals(".NaN") || s.equals(".NAN"))) {
-            return new YamlDoubleNumber(Double.NaN); //, s);
+            return new YamlDoubleNumber(Double.NaN);
         }
-        if (i == 0 && len > 2 && first == '0') {
-            char k = s.charAt(1);
+
+        // hex / octal (optional leading sign)
+        if (rest.length() > 2 && rest.charAt(0) == '0') {
+            char k = rest.charAt(1);
             if (k == 'x' || k == 'o') {
                 int radix = k == 'x' ? 16 : 8;
-                for (int p = 2; p < len; p++) if (Character.digit(s.charAt(p), radix) < 0) return null;
-                BigInteger b = new BigInteger(s.substring(2), radix);
-//                return YamlNumberImpl.parsed(b.bitLength() < 63 ? (Number) b.longValue() : b, s);
-                return b.bitLength() < 63 ? new YamlLongNumber(b.longValue()) : new YamlBigIntegerNumber(b);
+                for (int p = 2; p < rest.length(); p++) {
+                    if (Character.digit(rest.charAt(p), radix) < 0) return null;
+                }
+                BigInteger b = new BigInteger(rest.substring(2), radix);
+                if (negative) b = b.negate();
+                return integralNumber(b);
             }
         }
+
         int j = i;
         while (j < len && digit(s.charAt(j))) j++;
         int before = j - i;
+
+        // pure integer
         if (j == len) {
             if (before == 0) return null;
-//            Number n = before <= 18 ? (Number) Long.parseLong(s) : new BigInteger(s);
-//            return YamlNumberImpl.parsed(n, s);
-            return before <= 18 ? new YamlLongNumber(Long.parseLong(s)) : new YamlBigIntegerNumber(new BigInteger(s));
+            return integralNumber(new BigInteger(s));
         }
+
+        // fractional / exponent → float hierarchy
         int after = 0;
         if (s.charAt(j) == '.') {
             j++;
@@ -124,6 +132,34 @@ public final class ScalarResolver {
             if (j == k) return null;
         }
         if (j != len) return null;
-        return new YamlBigDecimalNumber(new BigDecimal(s));//, s);
+
+        return decimalNumber(new BigDecimal(s));
     }
+
+	/** int → long → BigInteger by actual range */
+	private static YamlNumber<? extends Number> integralNumber(BigInteger b) {
+	    try {
+	        return new YamlIntegerNumber(b.intValueExact());
+	    } catch (ArithmeticException ignored) { }
+	    try {
+	        return new YamlLongNumber(b.longValueExact());
+	    } catch (ArithmeticException ignored) { }
+	    return new YamlBigIntegerNumber(b);
+	}
+
+	/**
+	 * Prefer float, then double, when the binary value round-trips to the same BigDecimal;
+	 * otherwise keep exact BigDecimal.
+	 */
+	private static YamlNumber<? extends Number> decimalNumber(BigDecimal bd) {
+	    float f = bd.floatValue();
+	    if (Float.isFinite(f) && new BigDecimal(Float.toString(f)).compareTo(bd) == 0) {
+	        return new YamlFloatNumber(f);
+	    }
+	    double d = bd.doubleValue();
+	    if (Double.isFinite(d) && new BigDecimal(Double.toString(d)).compareTo(bd) == 0) {
+	        return new YamlDoubleNumber(d);
+	    }
+	    return new YamlBigDecimalNumber(bd);
+	}
 }

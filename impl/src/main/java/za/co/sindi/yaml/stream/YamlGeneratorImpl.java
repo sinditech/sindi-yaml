@@ -109,55 +109,64 @@ public class YamlGeneratorImpl implements YamlGenerator {
 	@Override
 	public YamlGenerator write(String name, YamlNode value) {
 		// TODO Auto-generated method stub
-		return null;
+		writeKey(name);
+		return write(value);
 	}
 
 	@Override
 	public YamlGenerator write(String name, String value) {
 		// TODO Auto-generated method stub
-		return null;
+		writeKey(name);
+		return write(value);
 	}
 
 	@Override
 	public YamlGenerator write(String name, BigInteger value) {
 		// TODO Auto-generated method stub
-		return null;
+		writeKey(name);
+		return write(value);
 	}
 
 	@Override
 	public YamlGenerator write(String name, BigDecimal value) {
 		// TODO Auto-generated method stub
-		return null;
+		writeKey(name);
+		return write(value);
 	}
 
 	@Override
 	public YamlGenerator write(String name, int value) {
 		// TODO Auto-generated method stub
-		return null;
+		writeKey(name);
+		return write(value);
 	}
 
 	@Override
 	public YamlGenerator write(String name, long value) {
 		// TODO Auto-generated method stub
-		return null;
+		writeKey(name);
+		return write(value);
 	}
 
 	@Override
 	public YamlGenerator write(String name, double value) {
 		// TODO Auto-generated method stub
-		return null;
+		writeKey(name);
+		return write(value);
 	}
 
 	@Override
 	public YamlGenerator write(String name, boolean value) {
 		// TODO Auto-generated method stub
-		return null;
+		writeKey(name);
+		return write(value);
 	}
 
 	@Override
 	public YamlGenerator writeNull(String name) {
 		// TODO Auto-generated method stub
-		return null;
+		writeKey(name);
+		return writeNull();
 	}
 
 	@Override

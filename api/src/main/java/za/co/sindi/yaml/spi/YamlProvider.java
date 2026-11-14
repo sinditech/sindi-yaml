@@ -44,8 +44,8 @@ public abstract class YamlProvider {
      * A constant representing the name of the default
      * {@code YamlProvider} implementation class.
      */
-    private static final String DEFAULT_PROVIDER
-            = "za.co.sindi.yaml.spi.YamlProviderImpl";
+//    private static final String DEFAULT_PROVIDER
+//            = "za.co.sindi.yaml.spi.YamlProviderImpl";
 
 	/**
      * Default constructor.
@@ -60,19 +60,19 @@ public abstract class YamlProvider {
             return it.next();
         }
 
-        try {
-            Class<?> clazz = Class.forName(DEFAULT_PROVIDER);
-            return (YamlProvider) clazz.getConstructor().newInstance();
-        } catch (ClassNotFoundException x) {
-            throw new YamlException(
-                    "Provider " + DEFAULT_PROVIDER + " not found", x);
-        } catch (Exception x) {
-            throw new YamlException(
-                    "Provider " + DEFAULT_PROVIDER + " could not be instantiated: " + x,
-                    x);
-        }
+//        try {
+//            Class<?> clazz = Class.forName(DEFAULT_PROVIDER);
+//            return (YamlProvider) clazz.getConstructor().newInstance();
+//        } catch (ClassNotFoundException x) {
+//            throw new YamlException(
+//                    "Provider " + DEFAULT_PROVIDER + " not found", x);
+//        } catch (Exception x) {
+//            throw new YamlException(
+//                    "Provider " + DEFAULT_PROVIDER + " could not be instantiated: " + x,
+//                    x);
+//        }
         
-//        throw new YamlException("No YamlProvider could be found.");
+        throw new YamlException("No YamlProvider could be found.");
     }
     
 
